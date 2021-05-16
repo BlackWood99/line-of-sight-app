@@ -1,0 +1,1 @@
+export const CHANGE_VALUE = "OPTIONS/CHANGE_VALUE"
