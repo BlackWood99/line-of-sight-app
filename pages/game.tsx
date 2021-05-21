@@ -26,7 +26,7 @@ function shuffleArrayFn(array: string[], maxLenght: number): any {
 }
 
 function splitByIndex(value: string) {
-	if (value == undefined) return ""
+	if (value == undefined) return null
 
 	let index = Math.round(value.length / 2)
 	return [value.substring(0, index), value.substring(index)]
@@ -35,7 +35,6 @@ function splitByIndex(value: string) {
 // --------------------------
 
 const Game = () => {
-	
 	const router = useRouter()
 
 	const options = useSelector((state: stateType) => state)
@@ -51,26 +50,45 @@ const Game = () => {
 		setShuffleArr(shuffleArrayFn(wordsArr, options.lettersInWordCount))
 	}, [wordsArr, options.lettersInWordCount])
 
-	const [currWord, setCurrWord] = useState<string[] | "">("")
+	const [currWord, setCurrWord] = useState<string[] | "" | null>("")
 
 	setTimeout(() => {
 		setSpeedTimeOut(options.speed)
 		if (maxCount > counter) {
-			setCurrWord(
-				splitByIndex(shuffleArr[counter])
-			)
+			setCurrWord(splitByIndex(shuffleArr[counter]))
 			setCounter(counter + 1)
 			setDistance(distance + options.increaseDistance)
 		} else router.push("/finish")
+
+		if (currWord == null) router.push("/")
 	}, speedTimeOut * 1000)
 
 	if (currWord == "") return <Preloader />
+	if (currWord == null) {
+		return (
+			<FlexBox justifyContent="center" alignItems="center" minHeight="50vh">
+				<Title>
+					Извините, но слов с {options.lettersInWordCount} буквами нет
+				</Title>
+			</FlexBox>
+		)
+	}
 	if (!currWord && currWord !== "") return <h1>Error</h1>
-	
+
 	return (
-		<FlexBox justifyContent="center" alignItems="center" minHeight="50vh" margin="0 0 10px 0">
+		<FlexBox
+			justifyContent='center'
+			alignItems='center'
+			minHeight='50vh'
+			margin='0 0 10px 0'
+		>
 			<Title>{currWord[0]}</Title>
-			<FlexBox margin={`0 ${distance}px`}> <Title fontSize={120} fontWeight={900}>~</Title> </FlexBox>
+			<FlexBox margin={`0 ${distance}px`}>
+				{" "}
+				<Title fontSize={120} fontWeight={900}>
+					~
+				</Title>{" "}
+			</FlexBox>
 			<Title>{currWord[1]}</Title>
 		</FlexBox>
 	)
