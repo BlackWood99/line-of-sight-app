@@ -1,10 +1,11 @@
-import styled from "@emotion/styled"
-import { useRouter } from "next/dist/client/router"
 import React, { useEffect, useState } from "react"
 import { useSelector } from "react-redux"
+import { useRouter } from "next/dist/client/router"
 import { wordsArr } from "../data/words"
-import Header from "./components/Header"
-import { Preloader } from "./components/Preloader/Preloader"
+import FlexBox from "../components/FlexBox"
+import Title from "../components/Title"
+import Preloader from "../components/Preloader/Preloader"
+import { stateType } from "../redux/gameOptionsReducer"
 
 function shuffleArrayFn(array: string[], maxLenght: number): any {
 	let i = array.length - 1
@@ -19,7 +20,7 @@ function shuffleArrayFn(array: string[], maxLenght: number): any {
 		.map((item) => {
 			if (item.length === maxLenght) return item
 		})
-		.filter((item) => item != undefined)
+		.filter((item) => item !== undefined)
 
 	return newArr
 }
@@ -31,89 +32,47 @@ function splitByIndex(value: string) {
 	return [value.substring(0, index), value.substring(index)]
 }
 
-//////
+// --------------------------
 
 const Game = () => {
-
+	
 	const router = useRouter()
 
-	const options: any = useSelector((state) => state)
+	const options = useSelector((state: stateType) => state)
 
 	const [shuffleArr, setShuffleArr] = useState<[] | string[]>(wordsArr)
 
 	const [counter, setCounter] = useState(0)
 	const maxCount = options.wordsCount
+	const [speedTimeOut, setSpeedTimeOut] = useState(1)
+	const [distance, setDistance] = useState(options.startDistance)
 
 	useEffect(() => {
 		setShuffleArr(shuffleArrayFn(wordsArr, options.lettersInWordCount))
-	}, [])
+	}, [wordsArr, options.lettersInWordCount])
 
 	const [currWord, setCurrWord] = useState<string[] | "">("")
 
 	setTimeout(() => {
+		setSpeedTimeOut(options.speed)
 		if (maxCount > counter) {
-			const splitedWord = splitByIndex(shuffleArr[counter])
-			setCurrWord(splitedWord)
+			setCurrWord(
+				splitByIndex(shuffleArr[counter])
+			)
 			setCounter(counter + 1)
+			setDistance(distance + options.increaseDistance)
 		} else router.push("/finish")
-	}, options.speed * 1000)
-
-
-	const AppWrapper = styled("div")`
-		background-color: #f7f9ff;
-		min-height: 100vh;
-	`
-
-	const Container = styled("div")`
-		min-height: 50vh;
-		width: 100%;
-		max-width: 1460px;
-		margin: 0 auto;
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		flex-wrap: wrap;
-	`
-	const TitleWrapper = styled("div")`
-		display: flex;
-		align-items: center;
-		margin-bottom: 10px;
-	`
-
-	const Title = styled("h3")`
-		font-family: Roboto;
-		font-weight: bold;
-		font-size: 54px;
-		line-height: 52px;
-		color: #371548;
-	`
-
-	const ImgWrapper = styled("div")`
-		display: flex;
-		justify-content: space-between;
-		font-size: 120px;
-		font-weight: bold;
-		color: #371548;
-		margin: 0 ${"50px"};
-	`
-
-	
+	}, speedTimeOut * 1000)
 
 	if (currWord == "") return <Preloader />
 	if (!currWord && currWord !== "") return <h1>Error</h1>
-
+	
 	return (
-		<AppWrapper>
-			<Header text={false} />
-
-			<Container>
-				<TitleWrapper>
-					<Title>{currWord[0]}</Title>
-					<ImgWrapper> ~ </ImgWrapper>
-					<Title>{currWord[1]}</Title>
-				</TitleWrapper>
-			</Container>
-		</AppWrapper>
+		<FlexBox justifyContent="center" alignItems="center" minHeight="50vh" margin="0 0 10px 0">
+			<Title>{currWord[0]}</Title>
+			<FlexBox margin={`0 ${distance}px`}> <Title fontSize={120} fontWeight={900}>~</Title> </FlexBox>
+			<Title>{currWord[1]}</Title>
+		</FlexBox>
 	)
 }
 

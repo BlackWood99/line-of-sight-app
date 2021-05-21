@@ -1,6 +1,6 @@
 import styles from "./Preloader.module.css"
 
-export const Preloader: React.FC = () => {
+const Preloader: React.FC = () => {
 	return (
 		<div className={styles.preloader}>
 		    <div className={styles.ldsSpinner}>
@@ -20,3 +20,5 @@ export const Preloader: React.FC = () => {
 		</div>
 	)
 }
+
+export default Preloader
